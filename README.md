@@ -25,7 +25,8 @@ A lightweight, high-performance WebGL2 shader application that transforms images
 dithering-ascii-image/
 ├── index.html     # Main HTML document and layout
 ├── styles.css     # Dark-mode UI styling and layout design
-└── script.js     # WebGL2 context, GLSL shaders, and UI interaction logic
+├── script.js     # WebGL2 context, GLSL shaders, and UI interaction logic
+└── favicon.svg    # Orange-themed dithered matrix vector favicon
 ```
 
 ---
