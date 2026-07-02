@@ -499,7 +499,13 @@
     if (file) loadFile(file);
   });
 
-  document.getElementById('demoBtn').addEventListener('click', () => setImageSource(makeDemoImage()));
+  document.getElementById('demoPumaBtn').addEventListener('click', () => {
+    const img = new Image();
+    img.onload = () => setImageSource(img);
+    img.onerror = () => setImageSource(makeDemoImage());
+    img.src = 'puma.jpg';
+  });
+  document.getElementById('demoSceneBtn').addEventListener('click', () => setImageSource(makeDemoImage()));
 
   document.getElementById('downloadBtn').addEventListener('click', () => {
     render();
