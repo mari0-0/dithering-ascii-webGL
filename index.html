@@ -1,117 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DITHER LAB — real-time ASCII &amp; dither shader</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DITHER LAB — real-time ASCII &amp; dither shader</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-<div class="wrap">
+  <div class="wrap">
 
-  <header>
-    <div class="brand">
-      <h1>DITHER LAB<span class="cursor"></span></h1>
-      <span class="tag">real-time ASCII + ordered-dither shader</span>
+    <header>
+      <div class="brand">
+        <h1>DITHER LAB<span class="cursor"></span></h1>
+        <span class="tag">real-time ASCII + ordered-dither shader</span>
+      </div>
+      <a href="https://abhaimatta.xyz" target="_blank" rel="noopener" class="nav-portfolio">abhaimatta.xyz ↗</a>
+    </header>
+
+    <div class="app">
+
+      <div class="stage">
+        <div class="frame empty" id="frame">
+          <canvas id="glcanvas"></canvas>
+          <div class="dropzone" id="dropzone">
+            <div class="icon">↓</div>
+            <p>drop an image here, or click to upload</p>
+            <span>a demo scene is loaded until you do</span>
+          </div>
+        </div>
+        <div class="status-line">
+          <span id="statusLeft">512×384 · loading…</span>
+          <span id="statusRight"><b>ASCII</b> · cell 10px · 10 glyphs</span>
+        </div>
+        <div class="stage-actions">
+          <button class="btn primary" id="uploadBtn">Upload image</button>
+          <button class="btn" id="demoBtn">Use demo scene</button>
+          <button class="btn" id="downloadBtn">Download PNG</button>
+        </div>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+
+      <div class="panel">
+
+        <div class="section">
+          <div class="section-label">Mode</div>
+          <div class="seg" id="modeSeg">
+            <button data-mode="0" class="active">ASCII</button>
+            <button data-mode="1">Dither</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-label">Color style</div>
+          <div class="seg" id="colorSeg">
+            <button data-color="0" class="active">Palette</button>
+            <button data-color="1">Full color</button>
+          </div>
+        </div>
+
+        <div class="section" id="paletteSection">
+          <div class="section-label">Palette</div>
+          <div class="swatches" id="swatches"></div>
+        </div>
+
+        <div class="section" id="asciiSection">
+          <div class="section-label">Ascii</div>
+          <div class="row"><label for="cellSize">Cell size</label><span class="val" id="cellSizeVal">5px</span></div>
+          <input type="range" id="cellSize" min="5" max="26" step="1" value="5">
+        </div>
+
+        <div class="section" id="ditherSection" style="display:none;">
+          <div class="section-label">Dither</div>
+          <div class="row"><label for="matrixSize">Bayer matrix</label></div>
+          <select id="matrixSize">
+            <option value="0">2 × 2</option>
+            <option value="1">4 × 4</option>
+            <option value="2" selected>8 × 8</option>
+          </select>
+          <div class="row" style="margin-top:12px;"><label for="pixelSize">Pixel size</label><span class="val"
+              id="pixelSizeVal">3px</span></div>
+          <input type="range" id="pixelSize" min="1" max="14" step="1" value="3">
+          <div class="row" id="levelsRow" style="margin-top:12px;display:none;"><label for="levels">Levels /
+              channel</label><span class="val" id="levelsVal">4</span></div>
+          <input type="range" id="levels" min="2" max="8" step="1" value="4" style="display:none;">
+          <div class="row" id="strengthRow" style="margin-top:12px;display:none;"><label for="strength">Dither
+              strength</label><span class="val" id="strengthVal">1.0</span></div>
+          <input type="range" id="strength" min="0" max="2" step="0.05" value="1" style="display:none;">
+        </div>
+
+        <div class="section">
+          <div class="section-label">Adjust</div>
+          <div class="row"><label for="contrast">Contrast</label><span class="val" id="contrastVal">1.00</span></div>
+          <input type="range" id="contrast" min="0.4" max="2.2" step="0.02" value="1.15">
+          <div class="row" style="margin-top:12px;"><label for="brightness">Brightness</label><span class="val"
+              id="brightnessVal">0.00</span></div>
+          <input type="range" id="brightness" min="-0.4" max="0.4" step="0.01" value="0">
+          <div class="toggle-row" style="margin-top:14px;">
+            <label style="font-size:12px;color:var(--text-dim);">Invert</label>
+            <div class="switch" id="invertSwitch"><i></i></div>
+          </div>
+        </div>
+
+        <div class="hint">Every pixel is shaded live by the GPU: glyphs are drawn from a packed-bit 5×5 grid, palette
+          colors are chosen by comparing luminance to a Bayer threshold — no CPU loop, no bitmap font, no external
+          assets.</div>
+
+      </div>
     </div>
-    <a href="https://abhaimatta.xyz" target="_blank" rel="noopener" class="nav-portfolio">abhaimatta.xyz ↗</a>
-  </header>
 
-  <div class="app">
+    <footer>
+      <div class="credit">Runs entirely in one WebGL2 fragment shader — procedural bitmap glyphs, Bayer threshold
+        matrices, no images or fonts loaded. Technique inspired by Codrops' <a
+          href="https://tympanus.net/codrops/2026/01/04/efecto-building-real-time-ascii-and-dithering-effects-with-webgl-shaders/"
+          target="_blank" rel="noopener">Efecto</a> writeup.</div>
+      <div class="portfolio"><a href="https://abhaimatta.xyz" target="_blank" rel="noopener">abhaimatta.xyz</a></div>
+    </footer>
 
-    <div class="stage">
-      <div class="frame empty" id="frame">
-        <canvas id="glcanvas"></canvas>
-        <div class="dropzone" id="dropzone">
-          <div class="icon">↓</div>
-          <p>drop an image here, or click to upload</p>
-          <span>a demo scene is loaded until you do</span>
-        </div>
-      </div>
-      <div class="status-line">
-        <span id="statusLeft">512×384 · loading…</span>
-        <span id="statusRight"><b>ASCII</b> · cell 10px · 10 glyphs</span>
-      </div>
-      <div class="stage-actions">
-        <button class="btn primary" id="uploadBtn">Upload image</button>
-        <button class="btn" id="demoBtn">Use demo scene</button>
-        <button class="btn" id="downloadBtn">Download PNG</button>
-      </div>
-      <input type="file" id="fileInput" accept="image/*">
-    </div>
-
-    <div class="panel">
-
-      <div class="section">
-        <div class="section-label">Mode</div>
-        <div class="seg" id="modeSeg">
-          <button data-mode="0" class="active">ASCII</button>
-          <button data-mode="1">Dither</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-label">Color style</div>
-        <div class="seg" id="colorSeg">
-          <button data-color="0" class="active">Palette</button>
-          <button data-color="1">Full color</button>
-        </div>
-      </div>
-
-      <div class="section" id="paletteSection">
-        <div class="section-label">Palette</div>
-        <div class="swatches" id="swatches"></div>
-      </div>
-
-      <div class="section" id="asciiSection">
-        <div class="section-label">Ascii</div>
-        <div class="row"><label for="cellSize">Cell size</label><span class="val" id="cellSizeVal">10px</span></div>
-        <input type="range" id="cellSize" min="5" max="26" step="1" value="10">
-      </div>
-
-      <div class="section" id="ditherSection" style="display:none;">
-        <div class="section-label">Dither</div>
-        <div class="row"><label for="matrixSize">Bayer matrix</label></div>
-        <select id="matrixSize">
-          <option value="0">2 × 2</option>
-          <option value="1">4 × 4</option>
-          <option value="2" selected>8 × 8</option>
-        </select>
-        <div class="row" style="margin-top:12px;"><label for="pixelSize">Pixel size</label><span class="val" id="pixelSizeVal">3px</span></div>
-        <input type="range" id="pixelSize" min="1" max="14" step="1" value="3">
-        <div class="row" id="levelsRow" style="margin-top:12px;display:none;"><label for="levels">Levels / channel</label><span class="val" id="levelsVal">4</span></div>
-        <input type="range" id="levels" min="2" max="8" step="1" value="4" style="display:none;">
-        <div class="row" id="strengthRow" style="margin-top:12px;display:none;"><label for="strength">Dither strength</label><span class="val" id="strengthVal">1.0</span></div>
-        <input type="range" id="strength" min="0" max="2" step="0.05" value="1" style="display:none;">
-      </div>
-
-      <div class="section">
-        <div class="section-label">Adjust</div>
-        <div class="row"><label for="contrast">Contrast</label><span class="val" id="contrastVal">1.00</span></div>
-        <input type="range" id="contrast" min="0.4" max="2.2" step="0.02" value="1.15">
-        <div class="row" style="margin-top:12px;"><label for="brightness">Brightness</label><span class="val" id="brightnessVal">0.00</span></div>
-        <input type="range" id="brightness" min="-0.4" max="0.4" step="0.01" value="0">
-        <div class="toggle-row" style="margin-top:14px;">
-          <label style="font-size:12px;color:var(--text-dim);">Invert</label>
-          <div class="switch" id="invertSwitch"><i></i></div>
-        </div>
-      </div>
-
-      <div class="hint">Every pixel is shaded live by the GPU: glyphs are drawn from a packed-bit 5×5 grid, palette colors are chosen by comparing luminance to a Bayer threshold — no CPU loop, no bitmap font, no external assets.</div>
-
-    </div>
   </div>
 
-  <footer>
-    <div class="credit">Runs entirely in one WebGL2 fragment shader — procedural bitmap glyphs, Bayer threshold matrices, no images or fonts loaded. Technique inspired by Codrops' <a href="https://tympanus.net/codrops/2026/01/04/efecto-building-real-time-ascii-and-dithering-effects-with-webgl-shaders/" target="_blank" rel="noopener">Efecto</a> writeup.</div>
-    <div class="portfolio"><a href="https://abhaimatta.xyz" target="_blank" rel="noopener">abhaimatta.xyz</a></div>
-  </footer>
-
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
